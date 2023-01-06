@@ -12,8 +12,8 @@ server.bind((host, port))  # binding server
 
 server.listen()  # opening server to listening traffic
 
-clients = []
-nicknames = []
+clients = []  # keeping temporary log of the client's ip
+usernames = []  # keeping temporary log of the client's username
 
 
 # defining broadcast function to send the message to all the clients
@@ -23,36 +23,40 @@ def broadcast(message):
         client.send(message)
 
 
-# receiving messages from the client
+#  managing the clients connected to the server
 
 def handle(client):
     while True:
+        # checking the connection with the client
         try:
-            message = client.recv(1024)
+            message = client.recv(1024)  # listening the client
             broadcast(message)
+        # deleting the client from the list if the connection with client fails
         except:
-            index = clients.index(client)
+            index = clients.index(client)  
             clients.remove(client)
-            client.close()
-            nickname = nicknames[index]
-            broadcast(f'{nickname} left the chat! '.encode('ascii'))
-            nicknames.remove(nickname)
+            client.close()  # closing the connection with the client
+            username = usernames[index]
+            broadcast(f'{username} left the chat! '.encode('ascii'))
+            usernames.remove(username)
             break
 
 
+# receiving messages from the client
+
 def receive():
     while True:
-        client, address = server.accept()
+        client, address = server.accept()  # accepting the client's connection
         print(f"Connected with {str(address)}")
 
-        client.send("NICK".encode('ascii'))
-        nickname = client.recv(1024).decode('ascii')
-        nicknames.append(nickname)
-        clients.append(client)
+        client.send("NICK".encode('ascii'))  # trigger to ask the client for the user details
+        username = client.recv(1024).decode('ascii')
+        usernames.append(username)
+        clients.append(client)  # adding the details of user in the list
 
-        print(f"Nickname of the client is {nickname}!")
-        broadcast(f'{nickname} joined the chat!'.encode('ascii'))
-        client.send('connected to the server!'.encode('ascii'))
+        print(f"username of the client is {username}!")
+        broadcast(f'{username} joined the chat!'.encode('ascii'))  # tell the clients in the server about new user
+        client.send('connected to the server!'.encode('ascii'))  # share any new message
 
         thread = threading.Thread(target=handle, args=(client,))
         thread.start()
