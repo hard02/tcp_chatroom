@@ -33,7 +33,7 @@ def handle(client):
             broadcast(message)
         # deleting the client from the list if the connection with client fails
         except:
-            index = clients.index(client)  
+            index = clients.index(client)
             clients.remove(client)
             client.close()  # closing the connection with the client
             username = usernames[index]
